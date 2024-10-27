@@ -21,10 +21,10 @@ function App() {
     const row = []
     const rowStats = [];
     for(let y = 0; y < dimension; y++){
-      const [tileStats, setTileStat] = useState({value: State.EMPTY, x: x, y: y})
+      const [tileStats, setTileStat] = useState({value: State.EMPTY, x: x, y: y, setter: (o) => setTileStat(o)})
       rowStats.push(tileStats)
       row.push( 
-        <Tile key={y} tileStats={tileStats} handleClick={() => handleClick(tileStats, setTileStat)}  winnerCheck={() => winnerCheck(tileStats)}/>
+        <Tile key={y} tileStats={tileStats} handleClick={() => handleClick(tileStats)}  winnerCheck={() => winnerCheck(tileStats)}/>
       )
     }
     boardStats.push(rowStats)
@@ -35,13 +35,13 @@ function App() {
 
 
   //gameplay
-  const handleClick = (tileStats, setTileStat)=>{    
+  const handleClick = (tileStats)=>{    
     if(tileStats.value != State.EMPTY) return
 
     if(turn % 2 === 0) 
-      setTileStat({...tileStats, value: State.X})
+      tileStats.setter({...tileStats, value: State.X})
     else 
-      setTileStat({...tileStats, value: State.O})
+      tileStats.setter({...tileStats, value: State.O})
 
     setTurn(t =>  t + 1)
   }
@@ -57,8 +57,8 @@ function App() {
           break;
       if(i === dimension-1){
           //report win for s
-          console.log("winner")
           win(tileStats.value)
+          return
       }
     }
 
@@ -68,8 +68,8 @@ function App() {
             break;
         if(i === dimension-1){
             //report win for s
-            console.log("winner")
             win(tileStats.value)
+            return
         }
     }
     
@@ -81,8 +81,8 @@ function App() {
                 break;
             if(i === dimension-1){
                 //report win for s
-                console.log("winner")
                 win(tileStats.value)
+                return
             }
         }
     }
@@ -94,28 +94,45 @@ function App() {
                 break;
             if(i === dimension-1){
                 //report win for s
-                console.log("winner")
                 win(tileStats.value)
+                return
             }
         }
     }
 
     //check draw
-    if(turn === (Math.pow(dimension, 2) - 1)){
+    if(turn === (Math.pow(dimension, 2))){
         //report draw
-        console.log("draw")
         draw()
     }
   }
 
+  const gameReset = () =>{
+    setTimeout(()=>{
+      boardStats.map((e, _) => 
+        e.map((e, _) => 
+          e.setter({...e, value: State.EMPTY})
+        )
+      )
+      setTurn(0)
+      setEndGame("")
+
+    },3000)
+
+  }
+
 
   const win = (winner) => {
+    console.log("winner")
     setEndGame("winner is " + winner)
+    gameReset()
 
   }
 
   const draw = () => {
+    console.log("draw")
     setEndGame("It is draw")
+    gameReset()
 
   }
 
@@ -126,10 +143,8 @@ function App() {
       <h1>Tic tac toe</h1>
       <h3>{turn}</h3>
       <h2>{endGame}</h2>
-      <div>
-        {board}
-      </div>
-        
+
+      {board}
 
     </div>
   )
